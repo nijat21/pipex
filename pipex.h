@@ -4,11 +4,15 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <fcntl.h>
 #include <sys/wait.h>
 #include <sys/types.h>
-#include "ft_printf/ft_printf.h"
 
-typedef struct s_pipex {
+#include "Libft/libft.h"
+
+typedef struct s_pipex
+{
     int fd_in;
     int fd_out;
     int pipefd[2];
@@ -16,5 +20,6 @@ typedef struct s_pipex {
     char **cmd2;
 } t_pipex;
 
+void error_exit(char *msg, bool stop);
 
 #endif

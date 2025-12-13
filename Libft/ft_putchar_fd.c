@@ -1,23 +1,20 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   print_string.c                                     :+:      :+:    :+:   */
+/*   ft_putchar_fd.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nismayil <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: nismayil <nismayil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/02 14:25:37 by nismayil          #+#    #+#             */
-/*   Updated: 2024/12/02 14:25:39 by nismayil         ###   ########.fr       */
+/*   Created: 2024/11/21 13:21:37 by nismayil          #+#    #+#             */
+/*   Updated: 2024/11/21 17:31:30 by nismayil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_printf.h"
+#include "libft.h"
 
-int	print_string(char *str)
+void	ft_putchar_fd(char c, int fd)
 {
-	if (!str)
-		str = "(null)";
-	if (*str == '\0')
-		return (0);
-	ft_putstr_fd(str, 1);
-	return (ft_strlen(str));
+	if (fd < 0)
+		return ;
+	write(fd, &c, 1);
 }

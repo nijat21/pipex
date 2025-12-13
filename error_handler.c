@@ -1,7 +1,8 @@
 #include "pipex.h"
 
-void error_exit(char *msg, bool exit)
+void error_exit(char *msg, bool stop)
 {
     ft_printf(msg);
-    exit(EXIT_FAILURE);
+    if (stop)
+        exit(EXIT_FAILURE);
 }

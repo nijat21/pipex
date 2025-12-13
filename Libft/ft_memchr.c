@@ -1,30 +1,31 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   print_hex.c                                        :+:      :+:    :+:   */
+/*   ft_memchr.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: nismayil <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/02 14:24:31 by nismayil          #+#    #+#             */
-/*   Updated: 2024/12/02 14:24:36 by nismayil         ###   ########.fr       */
+/*   Created: 2024/11/21 13:20:26 by nismayil          #+#    #+#             */
+/*   Updated: 2024/11/21 13:20:28 by nismayil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_printf.h"
+#include "libft.h"
 
-static void	ft_puthex_fd(unsigned int num, int fd, int *count, char *base)
+void	*ft_memchr(const void *s, int c, size_t n)
 {
-	if (num >= 16)
-		ft_puthex_fd(num / 16, fd, count, base);
-	write(fd, &base[num % 16], 1);
-	(*count)++;
-}
+	size_t			i;
+	unsigned char	*str;
 
-int	print_hex(unsigned int n, char *base)
-{
-	int	count;
-
-	count = 0;
-	ft_puthex_fd(n, 1, &count, base);
-	return (count);
+	str = (unsigned char *)s;
+	i = 0;
+	while (i < n)
+	{
+		if (str[i] == (unsigned char)c)
+		{
+			return (&str[i]);
+		}
+		i++;
+	}
+	return (NULL);
 }
