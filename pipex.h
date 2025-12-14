@@ -8,11 +8,12 @@
 #include <fcntl.h>
 #include <sys/wait.h>
 #include <sys/types.h>
-
 #include "Libft/libft.h"
 
 typedef struct s_pipex
 {
+    int pid_ch1;
+    int pid_ch2;
     int fd_in;
     int fd_out;
     int pipefd[2];
