@@ -6,7 +6,7 @@ static void *parse_input(char **av, t_pipex *px)
 	if (px->fd_in == -1)
 	{
 		free(px);
-		error_exit("Error: Couldn't open the file\n", true);
+		error_exit("File", true, true);
 	}
 	px->cmd1 = ft_split(av[2], ' ');
 	px->cmd2 = ft_split(av[3], ' ');
@@ -15,40 +15,48 @@ static void *parse_input(char **av, t_pipex *px)
 	{
 		free(px);
 		close(px->fd_in);
-		error_exit("Error: Couldn't open the file\n", true);
+		error_exit("File", true, true);
 	}
 	if (pipe(px->pipefd) == -1)
 	{
 		free(px);
 		close(px->fd_in);
 		close(px->fd_out);
-		error_exit("Error: Pipe error\n", true);
+		error_exit("pipe", true, true);
 	}
 	return px;
 }
 
 void first_child(t_pipex *px, char **env)
 {
+	char *path;
 	// < files ls
 	dup2(px->fd_in, STDIN_FILENO);
 	dup2(px->pipefd[1], STDOUT_FILENO);
 	close(px->fd_in);
 	close(px->pipefd[0]);
 	close(px->pipefd[1]);
-	execve("/usr/bin/ls", px->cmd1, env);
+	path = resolve_path(env, px->cmd1[0]);
+	if (!path)
+		error_exit("Error: Command not found\n", true, false);
+	execve(path, px->cmd1, env);
 	perror("execve");
 	exit(EXIT_FAILURE);
 }
 
 void second_child(t_pipex *px, char **env)
 {
+	char *path;
 	// | echo > output.txt
 	dup2(px->pipefd[0], STDIN_FILENO);
 	dup2(px->fd_out, STDOUT_FILENO);
 	close(px->fd_out);
 	close(px->pipefd[0]);
 	close(px->pipefd[1]);
-	execve("/usr/bin/cat", px->cmd2, env);
+	path = resolve_path(env, px->cmd2[0]);
+	if (!path)
+		error_exit("Error: Command not found\n", true, false);
+	execve(path, px->cmd2, env);
 	perror("execve");
 	exit(EXIT_FAILURE);
 }
@@ -59,14 +67,15 @@ void run_processes(char **av, char **env)
 
 	px = malloc(sizeof(t_pipex));
 	if (!px)
-		error_exit("Error: Malloc failed\n", true);
+		error_exit("Error: Malloc failed\n", true, true);
 	parse_input(av, px);
-	if (pipe(px->pipefd) != 0)
-	{
-		perror("pipe");
-		free(px);
-		exit(EXIT_FAILURE);
-	}
+
+	char *path = resolve_path(env, px->cmd1[0]);
+	ft_printf("Path: %s\n", path);
+	int i = -1;
+	while (px->cmd1[++i])
+		ft_printf("Command: %s\n", px->cmd1[i]);
+
 	px->pid_ch1 = fork();
 	if (px->pid_ch1 < 0) // error
 	{
@@ -96,12 +105,13 @@ int main(int ac, char **av, char **env)
 	 * input -> ./pipex file1 cmd1 cmd2 file2
 	 * behavior -> < file1 cmd1 | cmd2 > file2
 
-	 WORKFLOW:
-	 1. Open file1
-	 2. Give file1 STDIN to cmd1
-	 3. Close file1
-	 4. Pass the result of step 2 as STDIN to cmd2
-	 5. Close file2
+	Resolve commands via PATH (no hardcoded paths)
+	Handle:
+		invalid commands
+		permission errors
+		missing files
+	Close FDs correctly in all branches
+	Understand who exits and who returns
 
 	 */
 	if (ac != 5)

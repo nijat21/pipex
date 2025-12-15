@@ -21,6 +21,7 @@ typedef struct s_pipex
     char **cmd2;
 } t_pipex;
 
-void error_exit(char *msg, bool stop);
+void error_exit(char *msg, bool stop, bool use_perror);
+char *resolve_path(char **env, char *cmd);
 
 #endif

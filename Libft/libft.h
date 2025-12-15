@@ -6,7 +6,7 @@
 /*   By: nismayil <nismayil@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/21 13:30:21 by nismayil          #+#    #+#             */
-/*   Updated: 2025/01/22 23:03:09 by nismayil         ###   ########.fr       */
+/*   Updated: 2025/12/15 12:58:21 by nismayil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,7 @@ void *ft_calloc(size_t count, size_t size);
 char *ft_strdup(const char *s1);
 char *ft_substr(char const *s, unsigned int start, size_t len);
 char *ft_strjoin(char const *s1, char const *s2);
+char *ft_strjoin3(char const *s1, char const *s2, char const *s3);
 char *ft_strtrim(char const *s1, char const *set);
 char **ft_split(char const *s, char c);
 char *ft_itoa(int n);
