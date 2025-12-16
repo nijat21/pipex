@@ -11,7 +11,7 @@ void first_child(t_pipex *px, char **env)
 	close(px->pipefd[1]);
 	path = resolve_path(env, px->cmd1[0]);
 	if (!path)
-		error_exit("Error: Command not found\n", true, false);
+		error_exit(ft_strjoin3("Error: Command not found: ", px->cmd1[0], "\n"), true, false);
 	execve(path, px->cmd1, env);
 	shell_exec_error(px->cmd1[0]);
 }
@@ -27,7 +27,7 @@ void second_child(t_pipex *px, char **env)
 	close(px->pipefd[1]);
 	path = resolve_path(env, px->cmd2[0]);
 	if (!path)
-		error_exit("Error: Command not found\n", true, false);
+		error_exit(ft_strjoin3("Error: Command not found:", px->cmd2[0], "\n"), true, false);
 	execve(path, px->cmd2, env);
 	shell_exec_error(px->cmd2[0]);
 }
@@ -35,31 +35,34 @@ void second_child(t_pipex *px, char **env)
 void run_processes(char **av, char **env)
 {
 	t_pipex *px;
+	int status_ch2;
 
 	px = (t_pipex *)safe_malloc(sizeof(t_pipex));
 	if (!px)
 		exit(EXIT_FAILURE);
 	parse_input(av, px);
 	px->pid_ch1 = fork();
-	if (px->pid_ch1 < 0) // error
+	if (px->pid_ch1 < 0)
 	{
 		free(px);
 		exit(EXIT_FAILURE);
 	}
-	if (px->pid_ch1 == 0) // in parent
+	if (px->pid_ch1 == 0)
 		first_child(px, env);
 	px->pid_ch2 = fork();
-	if (px->pid_ch2 < 0) // error
+	if (px->pid_ch2 < 0)
 	{
 		free(px);
 		exit(EXIT_FAILURE);
 	}
-	if (px->pid_ch2 == 0) // in parent
+	if (px->pid_ch2 == 0)
 		second_child(px, env);
 	safe_close(px->pipefd[0], px);
 	safe_close(px->pipefd[1], px);
-	waitpid(px->pid_ch1, NULL, 0); // WIP
-	waitpid(px->pid_ch2, NULL, 0);
+	safe_waitpid(px->pid_ch1);
+	status_ch2 = safe_waitpid(px->pid_ch2);
+	free(px);
+	exit(status_ch2);
 }
 
 int main(int ac, char **av, char **env)

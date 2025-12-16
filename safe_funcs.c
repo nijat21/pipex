@@ -22,8 +22,18 @@ void safe_close(int fd, t_pipex *px)
     }
 }
 
-void safe_waitpid(int pid, t_pipex *px)
+int safe_waitpid(pid_t pid)
 {
-    if (waitpid(pid, NULL, 0))
-        ;
+    int status;
+
+    if (waitpid(pid, &status, 0) == -1)
+    {
+        perror("Waitpid");
+        return -1;
+    }
+    if (WIFEXITED(status))
+        return (WEXITSTATUS(status));
+    else if (WIFSIGNALED(status))
+        return (128 + WTERMSIG(status));
+    return -1;
 }

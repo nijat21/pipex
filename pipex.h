@@ -17,8 +17,8 @@
 
 typedef struct s_pipex
 {
-    int pid_ch1;
-    int pid_ch2;
+    pid_t pid_ch1;
+    pid_t pid_ch2;
     int fd_in;
     int fd_out;
     int pipefd[2];
@@ -36,5 +36,6 @@ void error_exit(char *msg, bool leave, bool use_perror);
 // safe functions
 void *safe_malloc(size_t bytes);
 void safe_close(int fd, t_pipex *px);
+int safe_waitpid(pid_t pid);
 
 #endif
