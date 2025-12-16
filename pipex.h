@@ -9,6 +9,11 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 #include "Libft/libft.h"
+#include "errno.h"
+
+// execve errors
+#define CMD_NOT_FOUND 127
+#define CMD_NOT_EXEC 126
 
 typedef struct s_pipex
 {
@@ -21,7 +26,15 @@ typedef struct s_pipex
     char **cmd2;
 } t_pipex;
 
-void error_exit(char *msg, bool stop, bool use_perror);
+// parser
+void *parse_input(char **av, t_pipex *px);
+//
 char *resolve_path(char **env, char *cmd);
+// error handling
+int shell_exec_error(char *msg);
+void error_exit(char *msg, bool leave, bool use_perror);
+// safe functions
+void *safe_malloc(size_t bytes);
+void safe_close(int fd, t_pipex *px);
 
 #endif

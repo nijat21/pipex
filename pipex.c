@@ -1,32 +1,5 @@
 #include "pipex.h"
 
-static void *parse_input(char **av, t_pipex *px)
-{
-	px->fd_in = open(av[1], O_RDONLY);
-	if (px->fd_in == -1)
-	{
-		free(px);
-		error_exit("File", true, true);
-	}
-	px->cmd1 = ft_split(av[2], ' ');
-	px->cmd2 = ft_split(av[3], ' ');
-	px->fd_out = open(av[4], O_WRONLY | O_CREAT | O_TRUNC, 0644);
-	if (px->fd_in == -1)
-	{
-		free(px);
-		close(px->fd_in);
-		error_exit("File", true, true);
-	}
-	if (pipe(px->pipefd) == -1)
-	{
-		free(px);
-		close(px->fd_in);
-		close(px->fd_out);
-		error_exit("pipe", true, true);
-	}
-	return px;
-}
-
 void first_child(t_pipex *px, char **env)
 {
 	char *path;
@@ -40,8 +13,7 @@ void first_child(t_pipex *px, char **env)
 	if (!path)
 		error_exit("Error: Command not found\n", true, false);
 	execve(path, px->cmd1, env);
-	perror("execve");
-	exit(EXIT_FAILURE);
+	shell_exec_error(px->cmd1[0]);
 }
 
 void second_child(t_pipex *px, char **env)
@@ -57,25 +29,17 @@ void second_child(t_pipex *px, char **env)
 	if (!path)
 		error_exit("Error: Command not found\n", true, false);
 	execve(path, px->cmd2, env);
-	perror("execve");
-	exit(EXIT_FAILURE);
+	shell_exec_error(px->cmd2[0]);
 }
 
 void run_processes(char **av, char **env)
 {
 	t_pipex *px;
 
-	px = malloc(sizeof(t_pipex));
+	px = (t_pipex *)safe_malloc(sizeof(t_pipex));
 	if (!px)
-		error_exit("Error: Malloc failed\n", true, true);
+		exit(EXIT_FAILURE);
 	parse_input(av, px);
-
-	char *path = resolve_path(env, px->cmd1[0]);
-	ft_printf("Path: %s\n", path);
-	int i = -1;
-	while (px->cmd1[++i])
-		ft_printf("Command: %s\n", px->cmd1[i]);
-
 	px->pid_ch1 = fork();
 	if (px->pid_ch1 < 0) // error
 	{
@@ -84,7 +48,6 @@ void run_processes(char **av, char **env)
 	}
 	if (px->pid_ch1 == 0) // in parent
 		first_child(px, env);
-
 	px->pid_ch2 = fork();
 	if (px->pid_ch2 < 0) // error
 	{
@@ -93,9 +56,9 @@ void run_processes(char **av, char **env)
 	}
 	if (px->pid_ch2 == 0) // in parent
 		second_child(px, env);
-	close(px->pipefd[0]);
-	close(px->pipefd[1]);
-	waitpid(px->pid_ch1, NULL, 0);
+	safe_close(px->pipefd[0], px);
+	safe_close(px->pipefd[1], px);
+	waitpid(px->pid_ch1, NULL, 0); // WIP
 	waitpid(px->pid_ch2, NULL, 0);
 }
 
@@ -104,15 +67,13 @@ int main(int ac, char **av, char **env)
 	/*
 	 * input -> ./pipex file1 cmd1 cmd2 file2
 	 * behavior -> < file1 cmd1 | cmd2 > file2
-
-	Resolve commands via PATH (no hardcoded paths)
-	Handle:
-		invalid commands
-		permission errors
-		missing files
-	Close FDs correctly in all branches
-	Understand who exits and who returns
-
+		Resolve commands via PATH (no hardcoded paths)
+		Handle:
+			invalid commands
+			permission errors
+			missing files
+		Close FDs correctly in all branches
+		Understand who exits and who returns
 	 */
 	if (ac != 5)
 		return 0;
