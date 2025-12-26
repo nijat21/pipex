@@ -31,3 +31,35 @@ char *resolve_path(char **env, char *cmd)
     free(paths);
     return NULL;
 }
+
+void free_str_arr(char **arr)
+{
+    int i;
+
+    i = -1;
+    while (arr[++i])
+        free(arr[i]);
+    free(arr);
+}
+
+void free_int_arr(int **arr, int len)
+{
+    int i;
+
+    i = -1;
+    while (++i < len)
+        free(arr[i]);
+    free(arr);
+}
+
+// void free_px(t_pipex *px, int ncmd)
+// {
+//     int i;
+
+//     free_str_arr(px->cmds);
+//     free_int_arr(px->pid_childs, ncmd);
+//     i = -1;
+//     while (++i < ncmd - 1)
+//         free_arr_int(px->cmds[i], 2);
+//     free(px);
+// }

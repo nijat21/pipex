@@ -10,12 +10,12 @@ int shell_exec_error(char *cmd)
     exit(EXIT_FAILURE);
 }
 
-void error_exit(char *msg, bool leave, bool use_perror)
+void error_exit(char *msg, bool stop_program, bool use_perror)
 {
     if (use_perror)
         perror(msg);
     else
         ft_putendl_fd(msg, STDERR_FILENO);
-    if (leave)
+    if (stop_program)
         exit(EXIT_FAILURE);
 }

@@ -17,14 +17,21 @@
 
 typedef struct s_pipex
 {
-    pid_t pid_ch1;
-    pid_t pid_ch2;
+    pid_t pid_ch;
     int fd_in;
     int fd_out;
     int pipefd[2];
-    char **cmd1;
-    char **cmd2;
+    char **cmd;
 } t_pipex;
+
+// typedef struct s_pipex
+// {
+//     pid_t *pid_childs;
+//     int fd_in;
+//     int fd_out;
+//     int **pipefd;
+//     char ***cmds;
+// } t_pipex;
 
 // parser
 void *parse_input(char **av, t_pipex *px);
@@ -32,10 +39,14 @@ void *parse_input(char **av, t_pipex *px);
 char *resolve_path(char **env, char *cmd);
 // error handling
 int shell_exec_error(char *msg);
-void error_exit(char *msg, bool leave, bool use_perror);
+void error_exit(char *msg, bool stop_program, bool use_perror);
 // safe functions
 void *safe_malloc(size_t bytes);
-void safe_close(int fd, t_pipex *px);
 int safe_waitpid(pid_t pid);
+
+// utils
+void free_str_arr(char **arr);
+void free_int_arr(int **arr, int len);
+void free_px(t_pipex *px, int ncmd);
 
 #endif

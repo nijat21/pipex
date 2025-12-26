@@ -13,15 +13,6 @@ void *safe_malloc(size_t bytes)
     return (mem);
 }
 
-void safe_close(int fd, t_pipex *px)
-{
-    if (close(fd) != 0)
-    {
-        free(px);
-        error_exit("Close", true, true);
-    }
-}
-
 int safe_waitpid(pid_t pid)
 {
     int status;
