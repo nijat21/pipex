@@ -52,14 +52,8 @@ void free_int_arr(int **arr, int len)
     free(arr);
 }
 
-// void free_px(t_pipex *px, int ncmd)
-// {
-//     int i;
-
-//     free_str_arr(px->cmds);
-//     free_int_arr(px->pid_childs, ncmd);
-//     i = -1;
-//     while (++i < ncmd - 1)
-//         free_arr_int(px->cmds[i], 2);
-//     free(px);
-// }
+void free_px(t_pipex *px)
+{
+    free(px->pid_ch);
+    free(px);
+}

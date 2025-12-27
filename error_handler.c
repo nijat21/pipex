@@ -2,11 +2,12 @@
 
 int shell_exec_error(char *cmd)
 {
-    perror(cmd);
+    if (cmd)
+        perror(cmd);
     if (errno == ENOENT)
-        exit(CMD_NOT_FOUND);
+        exit(127);
     else if (errno == EACCES || errno == EISDIR || errno == ENOTDIR)
-        exit(CMD_NOT_EXEC);
+        exit(126);
     exit(EXIT_FAILURE);
 }
 
