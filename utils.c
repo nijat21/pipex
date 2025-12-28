@@ -54,6 +54,7 @@ void free_int_arr(int **arr, int len)
 
 void free_px(t_pipex *px)
 {
+    // free_str_arr(px->cmd);
     free(px->pid_ch);
     free(px);
 }

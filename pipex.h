@@ -19,11 +19,13 @@ typedef struct s_pipex
     int fd_in;
     int fd_out;
     int pipefd[2];
+    int ncmds;
+    int npipes;
     char **cmd;
 } t_pipex;
 
 // parser
-void *parse_input(char **av, t_pipex *px);
+void *parse_input(int ac, char **av);
 //
 char *resolve_path(char **env, char *cmd);
 // error handling
