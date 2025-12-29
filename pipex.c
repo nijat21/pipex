@@ -1,6 +1,6 @@
 #include "pipex.h"
 
-void run_child(t_pipex *px, char **env, bool last)
+void exec_cmd(t_pipex *px, char **env, bool last)
 {
 	char *path;
 	int output;
@@ -28,6 +28,50 @@ void run_child(t_pipex *px, char **env, bool last)
 	shell_exec_error(px->cmd[0]);
 }
 
+void setup_child(t_pipex *px, char *av, int i)
+{
+	bool has_pipe;
+
+	has_pipe = i < px->npipes;
+	px->cmd = ft_split(av[i + 2], ' ');
+	if (!px->cmd)
+	{
+		free_str_arr(px->cmd);
+		free_px(px);
+		error_exit("Cmd split", true, true);
+	}
+	if (has_pipe)
+		if (pipe(px->pipefd) < 0)
+		{
+			free_str_arr(px->cmd);
+			free_px(px);
+			error_exit("Pipe", true, true);
+		}
+	px->pid_ch[i] = fork();
+	if (px->pid_ch[i] < 0)
+	{
+		free_str_arr(px->cmd);
+		free_px(px);
+		error_exit("Fork", true, true);
+	}
+}
+
+void clean_parent(t_pipex *px, int i)
+{
+	free_str_arr(px->cmd);
+	close(px->fd_in);
+	if (i == px->npipes)
+	{
+		close(px->fd_out);
+		close(px->pipefd[0]);
+	}
+	else
+	{
+		close(px->pipefd[1]);
+		px->fd_in = px->pipefd[0];
+	}
+}
+
 void run_processes(int ac, char **av, char **env)
 {
 	t_pipex *px;
@@ -37,52 +81,13 @@ void run_processes(int ac, char **av, char **env)
 
 	px = parse_input(ac, av);
 	i = -1;
-	while (++i < px->ncmds) // last av is output.txt
+	while (++i < px->ncmds)
 	{
-		has_pipe = i < px->npipes;
-		// split cmd
-		px->cmd = ft_split(av[i + 2], ' ');
-		if (!px->cmd)
-		{
-			free_str_arr(px->cmd);
-			free_px(px);
-			error_exit("Cmd split", true, true);
-		}
-		// pipe if not the last process
-		if (has_pipe)
-			if (pipe(px->pipefd) < 0)
-			{
-				free_str_arr(px->cmd);
-				free_px(px);
-				error_exit("Pipe", true, true);
-			}
-		// fork
-		px->pid_ch[i] = fork();
-		if (px->pid_ch[i] < 0)
-		{
-			free_str_arr(px->cmd);
-			free_px(px);
-			error_exit("Fork", true, true);
-		}
-		// run childs
+		setup_child(px, av, i);
 		if (px->pid_ch[i] == 0)
-			run_child(px, env, i == px->npipes);
+			exec_cmd(px, env, i == px->npipes);
 		else
-		{
-			// close unnecessary fd-s in parent
-			free_str_arr(px->cmd);
-			close(px->fd_in);
-			if (i == px->npipes)
-			{
-				close(px->fd_out);
-				close(px->pipefd[0]);
-			}
-			else
-			{
-				close(px->pipefd[1]);
-				px->fd_in = px->pipefd[0];
-			}
-		}
+			clean_parent(px, i);
 	}
 	i = -1;
 	while (++i < px->ncmds)
@@ -93,12 +98,6 @@ void run_processes(int ac, char **av, char **env)
 
 int main(int ac, char **av, char **env)
 {
-	/*
-		mandatory:
-		* input -> ./pipex file1 cmd1 cmd2 file2
-		bonus:
-		* input -> ./pipex file1 cmd1 cmd2 cmd3 ... cmdn file2
-	*/
 	if (ac < 5)
 		return 0;
 
